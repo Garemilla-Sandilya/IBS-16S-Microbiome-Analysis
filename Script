@@ -1,0 +1,292 @@
+# Method (Pipeline)
+# Preprocessing
+#Extracts data from SRA, performs quality control and trims poor-quality reads before analysis with tools such as Mothur or QIIME2.
+# Step1: Download FASTQ files from SRA using SRA Toolkit
+```bash
+# Navigate to the sratoolkit binary directory and run:
+~/Software/sratoolkit.3.2.1-alma_linux64/bin/fastq-dump --split-files SRR5578910.man, SRR5578914.man, SRR5578918.man,SRR32883402, SRR32883403, SRR32883421
+```
+#Using fastq-dump (from the SRA Toolkit), the project downloads paired-end reads from 6 samples.
+# Output
+This command will generate two paired-end FASTQ files:
+SRR32883402_1.fastq
+SRR32883402_2.fastq
+SRR32883403_1.fastq
+SRR32883403_2.fastq
+SRR32883421_1.fastq
+SRR32883421_2.fastq
+SRR5578918.man_1.fastq
+SRR5578918.man_2.fastq
+SRR5578914.man_1.fastq
+SRR5578914.man_2.fastq
+SRR5578910.man_1.fastq
+SRR5578910.man_2.fastq
+
+# Step 2: Quality Check using FastQC
+```bash
+# Run FastQC on both forward and reverse reads
+~/Software/FastQC_v0.12.1/fastqc SRR32883402_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR32883402_2.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR32883403_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR32883403_2.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR32883421_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR32883421_2.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578918.man_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578918.man_2.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578914.man_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578914.man_2.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578910.man_1.fastq
+~/Software/FastQC_v0.12.1/fastqc SRR5578910.man_2.fastq
+```
+#Uses FastQC to evaluate raw sequence quality, adapter contamination, and overrepresented sequences.
+# Output
+This will produce two .html reports:
+SRR32883402_1_fastqc.html
+SRR32883402_2_fastqc.html
+SRR32883403_1_fastqc.html
+SRR32883403_2_fastqc.html
+SRR32883421_1_fastqc.html
+SRR32883421_2_fastqc.html
+SRR5578918.man_1_fastqc.html
+SRR5578918.man_2_fastqc.html
+SRR5578914.man_1_fastqc.html
+SRR5578914.man_2_fastqc.html
+SRR5578910.man_1_fastqc.html
+SRR5578910.man_2_fastqc.html
+#Check the FastQC reports for:
+Per base sequence quality
+Adapter content
+Overrepresented sequences
+If issues are found (e.g., low quality or adapters), proceed to trimming.
+
+# Step 3: Trimming Low-Quality Reads using Trimmomatic
+```bash
+# Paired-end read trimming
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR32883402_1.fastq SRR32883402_2.fastq \
+SRR32883402_1P.fastq SRR32883402_1U.fastq \
+SRR32883402_2P.fastq SRR32883402_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR32883403_1.fastq SRR32883403_2.fastq \
+SRR32883403_1P.fastq SRR32883403_1U.fastq \
+SRR32883403_2P.fastq SRR32883403_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR32883421_1.fastq SRR32883421_2.fastq \
+SRR32883421_1P.fastq SRR32883421_1U.fastq \
+SRR32883421_2P.fastq SRR32883421_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR5578918.man_1.fastq SRR5578918.man_2.fastq \
+SRR5578918.man_1P.fastq SRR5578918.man_1U.fastq \
+SRR5578918.man_2P.fastq SRR5578918.man_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR5578914.man_1.fastq SRR5578914.man_2.fastq \
+SRR5578914.man_1P.fastq SRR5578914.man_1U.fastq \
+SRR5578914.man_2P.fastq SRR5578914.man_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+
+java -jar ~/Software/Trimmomatic-0.39/trimmomatic-0.39.jar PE -threads 8 \
+SRR5578910.man_1.fastq SRR5578910.man_2.fastq \
+SRR5578910.man_1P.fastq SRR5578910.man_1U.fastq \
+SRR5578910.man_2P.fastq SRR5578910.man_2U.fastq \
+LEADING:20 TRAILING:20 SLIDINGWINDOW:4:20 MINLEN:50
+```
+#Uses Trimmomatic with:
+LEADING:20, TRAILING:20 → Remove low-quality ends
+SLIDINGWINDOW:4:20 → Dynamic trimming within sliding windows
+MINLEN:50 → Remove short reads
+
+# Output:
+SRR32883402_1P.fastq → Paired, trimmed forward reads
+SRR32883402_2P.fastq → Paired, trimmed reverse reads
+SRR32883402_1U.fastq and SRR32883402_2U.fastq → Unpaired reads
+SRR32883403_1P.fastq → Paired, trimmed forward reads
+SRR32883403_2P.fastq → Paired, trimmed reverse reads
+SRR32883403_1U.fastq and SRR32883403_2U.fastq → Unpaired reads 
+SRR32883421_1P.fastq → Paired, trimmed forward reads
+SRR32883421_2P.fastq → Paired, trimmed reverse reads
+SRR32883421_1U.fastq and SRR32883421_2U.fastq → Unpaired reads 
+SRR5578918.man_1P.fastq → Paired, trimmed forward reads
+SRR5578918.man_2P.fastq → Paired, trimmed reverse reads
+SRR5578918.man_1U.fastq and SRR5578918.man_2U.fastq → Unpaired reads 
+SRR5578914.man_1P.fastq → Paired, trimmed forward reads
+SRR5578914.man_2P.fastq → Paired, trimmed reverse reads
+SRR5578914.man_1U.fastq and SRR5578914.man_2U.fastq → Unpaired reads 
+SRR5578910.man_1P.fastq → Paired, trimmed forward reads
+SRR5578910.man_2P.fastq → Paired, trimmed reverse reads
+SRR5578910.man_1U.fastq and SRR5578910.man_2U.fastq → Unpaired reads 
+(can be discarded or saved separately)
+
+# Step4: Mothur Make file 
+```mothur
+mothur > make.file(inputdir=/home/Sandy/Multiple_samples, type=fastq, prefix=stability)
+```
+#Creates a .files config for Mothur, organizing forward/reverse FASTQs.
+
+# Step5: Reducing sequencing and PCR errors
+```mothur
+mothur > make.contigs(file=stability.files)
+```
+#make.contigs → Merges paired reads
+
+
+```mothur
+mothur > summary.seqs(fasta=stability.trim.contigs.fasta,count=stability.contigs.count_table)
+```
+#summary.seqs → Provides a sequence count and quality stats
+
+```mothur
+mothur > screen.seqs(fasta=stability.trim.contigs.fasta, count=stability.contigs.count_table, maxambig=0, maxlength=310, maxhomop=8)
+```
+#screen.seqs → Filters by ambiguous bases (maxambig=0), length, and homopolymers
+
+```mothur
+mothur > get.current()
+```
+#This shows the current status of your mothur session using the get.current() command. Your system is using only 0.37 GB out of 31.34 GB available RAM, so memory isn't an issue. Mothur has tracked all the files you've created during your workflow, including the good sequences (fasta), filtered sequences (accnos), quality reports, count tables, and summary files. The command shows your current working directory and input directory are both set to your Fastq_Files folder, and it generated a summary file (current_files.summary) listing all active files in your session.
+```mothur
+mothur > summary.seqs(fasta=stability.trim.contigs.good.fasta, count=stability.contigs.good.count_table)
+mothur > summary.seqs(fasta=current, count=current)
+mothur > summary.seqs(count=current)
+```
+# Step6: Processing improved sequences ( De-replication, Reference Alignment)
+```mothur
+mothur > unique.seqs(fasta=stability.trim.contigs.good.fasta, count=stability.contigs.good.count_table)
+```
+#unique.seqs → Remove duplicates
+```mothur
+mothur > summary.seqs(count=stability.trim.contigs.good.count_table)
+```
+
+```mothur
+mothur > pcr.seqs(fasta=/home/Sandy/Databases/silva.bacteria/silva.bacteria/silva.bacteria.fasta, start=11895, end=25318, keepdots=F)
+```
+#pre.cluster→ Clusters near-identical sequences and removes chimeras
+
+```mothur
+mothur > rename.file(input=silva.bacteria.pcr.fasta, new=silva.v4.fasta)
+mothur > summary.seqs(fasta=silva.v4.fasta)summary.seqs(fasta=silva.v4.fasta)
+```
+
+```mothur
+mothur > align.seqs(fasta=stability.trim.contigs.good.unique.fasta, reference=silva.v4.fasta)
+```
+
+```mothur
+mothur > summary.seqs(fasta=stability.trim.contigs.good.unique.align,count=stability.trim.contigs.good.count_table)
+```
+
+
+```mothur
+mothur > screen.seqs(fasta=stability.trim.contigs.good.unique.align,count=stability.trim.contigs.good.count_table, start=1968, end=11550)
+```
+
+```mothur
+mothur > summary.seqs(fasta=current, count=current)
+```
+
+```mothur
+mothur > filter.seqs(fasta=stability.trim.contigs.good.unique.good.align, vertical=T, trump=.)
+```
+
+```mothur
+mothur > unique.seqs(fasta=stability.trim.contigs.good.unique.good.filter.fasta,count=stability.trim.contigs.good.good.count_table)
+```
+
+```mothur
+mothur > pre.cluster(fasta=stability.trim.contigs.good.unique.good.filter.unique.fasta, count=stability.trim.contigs.good.unique.good.filter.count_table, diffs=2)
+```
+
+```mothur
+mothur > chimera.vsearch(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.count_table, dereplicate=t)
+```
+#chimera.vsearch → Clusters near-identical sequences and removes chimeras
+
+```mothur
+mothur > summary.seqs(fasta=current, count=current)
+```
+
+```mothur
+mothur > classify.seqs(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.fasta, count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.count_table, reference=/home/BIB/Users/Sandy/Databases/trainset19_072023.rdp.fasta, taxonomy=/home/BIB/Users/Sandy/Databases/trainset19_072023.rdp.tax)
+```
+
+```mothur
+mothur > 
+remove.lineage(fasta=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.fasta,count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.count_table,taxonomy=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.rdp.wang.taxonomy,taxon=Chloroplast-Mitochondria-unknown-Archaea-Eukaryota)
+```
+
+```mothur
+mothur > summary.tax(taxonomy=current, count=current)
+```
+
+# Step8: Preparing for analysis
+```mothur
+mothur > rename.file(fasta=current, count=current, taxonomy=current, prefix=final)
+```
+
+
+# Step9: OTUs
+```mothur
+mothur > dist.seqs(fasta=final.fasta, cutoff=0.03)
+mothur > cluster(column=final.dist, count=final.count_table)
+```
+
+```mothur
+mothur > cluster.split(fasta=final.fasta, count=final.count_table, taxonomy=final.taxonomy, taxlevel=4, cutoff=0.03)
+```
+
+```mothur
+mothur > make.shared(list=final.opti_mcc.list, count=final.count_table, label=0.03)
+```
+
+```mothur
+mothur > classify.otu(list=final.opti_mcc.list, count=final.count_table, taxonomy=final.taxonomy, label=0.03)
+```
+
+# Step10: ASVs
+```mothur
+mothur > make.shared(count=final.count_table)
+mothur > classify.otu(list=final.asv.list, count=final.count_table, taxonomy=final.taxonomy, label=ASV)
+```
+
+# Step11: Phylotypes
+```mothur
+mothur > phylotype(taxonomy=final.taxonomy)
+mothur > make.shared(list=final.tx.list, count=final.count_table, label=1)
+mothur > classify.otu(list=final.tx.list, count=final.count_table, taxonomy=final.taxonomy, label=1)
+```
+
+# Step12: Phylogenetic
+```mothur
+mothur > dist.seqs(fasta=final.fasta, output=lt)
+mothur > clearcut(phylip=final.phylip.dist)
+```
+
+# Step13: Analysis 
+```mothur
+mothur > count.groups(shared=final.opti_mcc.shared)
+mothur > sub.sample(shared=final.opti_mcc.shared, size=2403)
+```
+
+# Step14: OTU-based analysis
+## Alpha diversity
+```mothur
+mothur > rarefaction.single(shared=final.opti_mcc.shared, calc=sobs, freq=100)
+mothur > summary.single(shared=final.opti_mcc.shared, calc=nseqs-coverage-sobs-invsimpson, subsample=T)
+```
+
+## Beta diversity measurements 
+```mothur
+mothur > dist.shared(shared=final.opti_mcc.shared, calc=braycurtis-jclass, subsample=t)
+mothur > pcoa(phylip=final.opti_mcc.braycurtis.0.03.lt.ave.dist)
+mothur > nmds(phylip=final.opti_mcc.braycurtis.0.03.lt.ave.dist)
+mothur > nmds(phylip=final.opti_mcc.braycurtis.0.03.lt.ave.dist, mindim=3, maxdim=3)
+```
+
